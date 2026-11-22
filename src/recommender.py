@@ -125,16 +125,16 @@ def _score_song_features(
 
     genre_match = genre == preferred_genre
     mood_match = mood == preferred_mood
-    genre_points = 2.0 if genre_match else 0.0
+    genre_points = 1.0 if genre_match else 0.0
     mood_points = 1.0 if mood_match else 0.0
-    energy_points = 1.0 - abs(energy - target_energy)
+    energy_points = 2.0 * (1.0 - abs(energy - target_energy))
     acousticness_fit = acousticness if likes_acoustic else 1.0 - acousticness
     acousticness_points = 0.5 * acousticness_fit
 
     reasons = [
-        "genre match (+2.0)" if genre_match else "genre differs (+0.0)",
+        "genre match (+1.0)" if genre_match else "genre differs (+0.0)",
         "mood match (+1.0)" if mood_match else "mood differs (+0.0)",
-        f"energy similarity (+{energy_points:.2f}/1.0)",
+        f"energy similarity (+{energy_points:.2f}/2.0)",
         f"acousticness fit (+{acousticness_points:.2f}/0.5)",
     ]
     return genre_points + mood_points + energy_points + acousticness_points, reasons

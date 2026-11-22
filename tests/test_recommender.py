@@ -112,7 +112,29 @@ def test_energy_similarity_rewards_closer_matches():
     )
 
     assert close_score == 4.25
-    assert close_score > distant_score
+    assert abs(distant_score - 2.65) < 1e-9
+
+
+def test_weight_shift_favors_energy_over_genre():
+    preferences = {
+        "favorite_genre": "pop",
+        "favorite_mood": "happy",
+        "target_energy": 1.0,
+        "likes_acoustic": False,
+    }
+    genre_match = {
+        "genre": "pop", "mood": "happy", "energy": 0.0, "acousticness": 0.0
+    }
+    energy_match = {
+        "genre": "rock", "mood": "happy", "energy": 1.0, "acousticness": 0.0
+    }
+
+    genre_score, reasons = score_song(preferences, genre_match)
+    energy_score, _ = score_song(preferences, energy_match)
+    assert genre_score == 2.5
+    assert energy_score == 3.5
+    assert "genre match (+1.0)" in reasons
+    assert "energy similarity (+0.00/2.0)" in reasons
 
 
 def test_additional_taste_target_recommends_a_distinct_style():
@@ -186,7 +208,25 @@ def test_main_displays_ranked_recommendation_with_scoring_reasons(monkeypatch, c
     output = " ".join(capsys.readouterr().out.split())
     assert "1. Test Track" in output
     assert "Score 4.50/4.5" in output
-    assert "genre match (+2.0)" in output
+    assert "genre match (+1.0)" in output
     assert "mood match (+1.0)" in output
-    assert "energy similarity (+1.00/1.0)" in output
+    assert "energy similarity (+2.00/2.0)" in output
     assert "acousticness fit (+0.50/0.5)" in output
+
+
+def test_named_profiles_favor_their_matching_songs():
+    from src.main import TASTE_PROFILES
+
+    songs = [
+        {"genre": "pop", "mood": "happy", "energy": 0.8, "acousticness": 0.0},
+        {"genre": "lofi", "mood": "chill", "energy": 0.4, "acousticness": 1.0},
+        {"genre": "rock", "mood": "intense", "energy": 0.9, "acousticness": 0.0},
+    ]
+
+    expected_songs = {
+        "High-Energy Pop": songs[0],
+        "Chill Lofi": songs[1],
+        "Deep Intense Rock": songs[2],
+    }
+    for name, expected_song in expected_songs.items():
+        assert recommend_songs(TASTE_PROFILES[name], songs, k=1)[0][0] == expected_song

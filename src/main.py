@@ -14,23 +14,35 @@ from textwrap import fill
 from .recommender import load_songs, recommend_songs
 
 
+TASTE_PROFILES = {
+    "High-Energy Pop": {
+        "favorite_genre": "pop",
+        "favorite_mood": "happy",
+        "target_energy": 0.8,
+        "likes_acoustic": False,
+    },
+    "Chill Lofi": {
+        "favorite_genre": "lofi",
+        "favorite_mood": "chill",
+        "target_energy": 0.4,
+        "likes_acoustic": True,
+    },
+    "Deep Intense Rock": {
+        "favorite_genre": "rock",
+        "favorite_mood": "intense",
+        "target_energy": 0.9,
+        "likes_acoustic": False,
+    },
+}
+
+
 def main() -> None:
     songs = load_songs("data/songs.csv") 
     print(f"Loaded songs: {len(songs)}")
 
     taste_profile = {
-        "favorite_genre": "rock",
-        "favorite_mood": "intense",
-        "target_energy": 0.9,
-        "likes_acoustic": False,
-        "additional_tastes": [
-            {
-                "favorite_genre": "lofi",
-                "favorite_mood": "chill",
-                "target_energy": 0.4,
-                "likes_acoustic": True,
-            },
-        ],
+        **TASTE_PROFILES["Deep Intense Rock"],
+        "additional_tastes": [TASTE_PROFILES["Chill Lofi"]],
     }
 
     recommendations = recommend_songs(taste_profile, songs, k=5)
