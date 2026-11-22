@@ -21,16 +21,9 @@ Prompts:
 
 ## 3. How the Model Works  
 
-Explain your scoring approach in simple language.  
+The recommender compares each song with the listener's preferred genre, mood, energy level, and acoustic sound. A matching genre earns the most points, a matching mood earns fewer, and songs gain additional points when their energy and acousticness fit the listener's preferences. Genre and mood must match exactly; energy is rewarded for being close to the target, not simply for being high.
 
-Prompts:  
-
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
-
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+The listener can describe more than one taste, such as intense rock and chill lofi. The system scores each song against each taste, keeps the best score, and recommends the highest-scoring songs with reasons for their scores. Unlike the starter logic, which returned songs in their original order, this approach ranks them by how well they match. It uses song attributes rather than other listeners' behavior.
 
 ---
 

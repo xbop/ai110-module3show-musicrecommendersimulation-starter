@@ -17,17 +17,22 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world platforms often combine a person's listening behavior, item attributes, similar users' preferences, and contextual signals. This simulation uses a simpler content-based approach:
 
-Some prompts to answer:
+1. **Input:** Load song attributes from `data/songs.csv` and read the user's taste profile, which can include multiple distinct taste targets.
+2. **Score each song against each target:** Add **2.0** for an exact genre match and **1.0** for an exact mood match. Add up to **1.0** for energy similarity, calculated as `1 - abs(song energy - target energy)`. Add up to **0.5** for acousticness fit: `acousticness` when the user likes acoustic music, or `1 - acousticness` otherwise.
+3. **Choose and rank:** Keep each song's highest score across the user's taste targets, sort songs by that score in descending order, and return the top `k` with an explanation.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+The maximum score per target is **4.5**. This simulation does not use listener histories or collaborative filtering.
 
-You can include a simple diagram or bullet list if helpful.
+The simulation's data objects use these features:
+
+- **`Song`**: `id`, `title`, and `artist` identify the track; `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness` describe it.
+- **`UserProfile`**: a primary `favorite_genre`, `favorite_mood`, `target_energy`, and `likes_acoustic` preference, with optional additional taste targets for distinct styles.
+
+The CLI profile includes two taste targets—rock/intense/high-energy and lofi/chill/lower-energy—with their own acousticness preferences.
+
+**Potential biases and limitations:** Genre receives twice the points of mood, so a genre match can outweigh a mood match; exact category matching also misses related genres or moods. Choosing the best of multiple taste targets can favor one style without ensuring variety. Recommendations are further limited by the small, hand-selected catalog and simplified audio features.
 
 ---
 
@@ -68,18 +73,33 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Output for the default rock/intense and lofi/chill taste targets:
 
-```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
-```
+```text
+Loaded songs: 18
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+Top recommendations:
+
+1. Storm Runner
+   Score 4.44/4.5: best fit: rock/intense, genre match (+2.0), mood match
+   (+1.0), energy similarity (+0.99/1.0), acousticness fit (+0.45/0.5).
+
+2. Library Rain
+   Score 4.38/4.5: best fit: lofi/chill, genre match (+2.0), mood match (+1.0),
+   energy similarity (+0.95/1.0), acousticness fit (+0.43/0.5).
+
+3. Midnight Coding
+   Score 4.33/4.5: best fit: lofi/chill, genre match (+2.0), mood match (+1.0),
+   energy similarity (+0.98/1.0), acousticness fit (+0.35/0.5).
+
+4. Focus Flow
+   Score 3.39/4.5: best fit: lofi/chill, genre match (+2.0), mood differs
+   (+0.0), energy similarity (+1.00/1.0), acousticness fit (+0.39/0.5).
+
+5. Gym Hero
+   Score 2.44/4.5: best fit: rock/intense, genre differs (+0.0), mood match
+   (+1.0), energy similarity (+0.97/1.0), acousticness fit (+0.47/0.5).
+```
 
 ---
 
